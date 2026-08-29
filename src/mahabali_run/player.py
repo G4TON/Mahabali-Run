@@ -20,13 +20,13 @@ class Player(pg.sprite.Sprite):
         elif keys[pg.K_d] or keys[pg.K_RIGHT]:
             self.direction = 1
 
-    def move(self):
+    def move(self, dt):
         temp_pos = self.rect.copy()
         self.rect.centerx += self.direction * TRACK_WIDTH
         if self.rect.right < 0 or self.rect.left > WINDOW_WIDTH: self.rect = temp_pos
         self.direction = 0
 
 
-    def update(self):
+    def update(self, dt):
         self.get_input()
-        self.move()
+        self.move(dt)
