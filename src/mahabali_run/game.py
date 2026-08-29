@@ -1,6 +1,8 @@
-import pygame as pg
 from settings import *
 from utils import *
+
+import pygame as pg
+
 
 class Game:
     def __init__(self):
