@@ -1,5 +1,6 @@
 from settings import *
 from utils import *
+from player import Player
 
 import pygame as pg
 
@@ -14,6 +15,9 @@ class Game:
         self.clock = pg.time.Clock()
         self.running = True
 
+        self.all_sprites = pg.sprite.Group()
+        self.player = Player((self.all_sprites,))
+
     def run(self):
         dt = self.clock.tick() / 1000
         while self.running:
@@ -22,5 +26,8 @@ class Game:
                     self.running = False
 
             self.screen.fill('white')
+            self.all_sprites.draw(self.screen)
+
+            self.all_sprites.update()
             pg.display.update()
         pg.quit()
