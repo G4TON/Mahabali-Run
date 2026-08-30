@@ -5,6 +5,10 @@ def exitPressed(event):
     return (event.type == pg.KEYDOWN and event.key == pg.K_q) or (event.type == pg.QUIT)
 
 
+'''
+Timer class was copied from YouTuber ClearCode's YT tutorial on PyGame
+Credits to ClearCode, check out his YouTube channel.
+'''
 class Timer:
     """Class for handling timed events"""
     def __init__(self, duration, func=None, autostart=False, repeat=False):

@@ -18,7 +18,6 @@ class Game:
 
         self.all_sprites = pg.sprite.Group()
         self.player = Player((self.all_sprites,))
-        self.obstacle = Obstacle((self.all_sprites,))
 
     def run(self):
         while self.running:
@@ -30,6 +29,7 @@ class Game:
             self.screen.fill('white')
             self.all_sprites.draw(self.screen)
 
+            Obstacle.spawn(self.all_sprites)
             self.all_sprites.update(dt)
             pg.display.update()
         pg.quit()
