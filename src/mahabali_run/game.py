@@ -1,6 +1,7 @@
 from settings import *
 from utils import *
 from player import Player
+from obstacle import Obstacle
 
 import pygame as pg
 
@@ -17,10 +18,11 @@ class Game:
 
         self.all_sprites = pg.sprite.Group()
         self.player = Player((self.all_sprites,))
+        self.obstacle = Obstacle((self.all_sprites,))
 
     def run(self):
-        dt = self.clock.tick() / 1000
         while self.running:
+            dt = self.clock.tick() / 1000
             for event in pg.event.get():
                 if exitPressed(event):
                     self.running = False
@@ -28,6 +30,6 @@ class Game:
             self.screen.fill('white')
             self.all_sprites.draw(self.screen)
 
-            self.all_sprites.update()
+            self.all_sprites.update(dt)
             pg.display.update()
         pg.quit()
