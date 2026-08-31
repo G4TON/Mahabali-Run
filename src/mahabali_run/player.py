@@ -3,12 +3,11 @@ from utils import *
 
 import pygame as pg
 
-
 class Player(pg.sprite.Sprite):
     def __init__(self, groups):
         super().__init__(groups)
-        self.image = pg.Surface((128, 128))
-        self.rect = self.image.get_frect(midbottom=(WINDOW_WIDTH/2, WINDOW_HEIGHT - 80))
+        self.image = pg.Surface((SPRITE_SIZE * SPRITE_SCALING, SPRITE_SIZE * SPRITE_SCALING))
+        self.rect = self.image.get_frect(bottomleft=(((round(NUMBER_OF_TRACKS/2)) * TRACK_WIDTH) + PADDING/2, WINDOW_HEIGHT - 80))
         self.direction = 0
 
         self.image.fill('black')

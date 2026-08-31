@@ -1,7 +1,7 @@
 from settings import *
 from utils import *
 from player import Player
-from obstacle import Obstacle
+from obstacle import Obstacle, BigObstacle
 
 import pygame as pg
 
@@ -27,9 +27,12 @@ class Game:
                     self.running = False
 
             self.screen.fill('white')
-            self.all_sprites.draw(self.screen)
+            for sprite in self.all_sprites:
+                if isinstance(sprite, BigObstacle): sprite.draw(self.screen)
+                else: self.screen.blit(sprite.image, sprite.rect)
 
             Obstacle.spawn(self.all_sprites)
+            BigObstacle.spawn(self.all_sprites)
             self.all_sprites.update(dt)
             pg.display.update()
         pg.quit()
