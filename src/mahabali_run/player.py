@@ -4,8 +4,8 @@ from utils import *
 import pygame as pg
 
 class Player(pg.sprite.Sprite):
-    def __init__(self, groups):
-        super().__init__(groups)
+    def __init__(self):
+        super().__init__()
         self.image = pg.Surface((SPRITE_SIZE * SPRITE_SCALING, SPRITE_SIZE * SPRITE_SCALING))
         self.rect = self.image.get_frect(bottomleft=(((round(NUMBER_OF_TRACKS/2)) * TRACK_WIDTH) + PADDING/2, WINDOW_HEIGHT - 80))
         self.direction = 0

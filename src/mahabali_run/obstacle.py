@@ -46,7 +46,21 @@ class BigObstacle(Obstacle):
         pass
 
 
-obstacles = [Obstacle, BigObstacle]
+FOOT_POSITIONS = STARTING_POSITIONS[:-1]
+class FootObstacle(Obstacle):
+    def __init__(self, groups):
+        super().__init__(groups)
+
+        self.image = pg.Surface((2*TRACK_WIDTH, 2*TRACK_WIDTH))
+        self.rect = self.image.get_frect(topleft = random.choice(FOOT_POSITIONS))
+        self.rect.y += -starting_y + (NUMBER_OF_SPRITES - 2) * TRACK_WIDTH - PADDING/2
+
+    def draw(self, screen):
+        pg.draw.rect(screen, 'BROWN', self.rect)
+
+    def move(self, dt):
+        pass
+
 class ObstacleCreation:
     def __init__(self, groups, delay, rate):
         self.delay = delay
@@ -55,8 +69,13 @@ class ObstacleCreation:
         self.timer = Timer(delay, func=self.create, repeat=True, autostart=True)
 
     def create(self):
-        obstacle = random.choice(obstacles)
-        obstacle(self.groups)
+        choice = random.randint(1, 6)
+        if choice > 6:
+            Obstacle(self.groups)
+        elif choice == 9:
+            BigObstacle(self.groups)
+        else:
+            FootObstacle(self.groups)
 
     def update(self):
         self.timer.update()
