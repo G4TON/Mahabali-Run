@@ -18,7 +18,7 @@ class Game:
 
         self.all_sprites = pg.sprite.Group()
         self.player = Player((self.all_sprites,))
-        self.creator = ObstacleCreation(self.all_sprites, 3500, 9)
+        self.creator = ObstacleCreation(self.all_sprites, 3000, 9)
 
     def run(self):
         while self.running:
