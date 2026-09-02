@@ -13,12 +13,19 @@ class Obstacle(pg.sprite.Sprite):
         self.image = pg.Surface((SPRITE_SIZE * SPRITE_SCALING, SPRITE_SIZE * SPRITE_SCALING))
         self.rect = self.image.get_frect(topleft=random.choice(STARTING_POSITIONS))
 
+        self.index = 0
+        self.sprites = []
+
     def move(self, dt):
         self.rect.centery += dt * TRACK_SPEED
         if self.rect.top > WINDOW_HEIGHT: del self
 
     def update(self, dt):
         self.move(dt)
+        self.animate(dt)
+
+    def animate(self, dt):
+        pass
 
 
 class BigObstacle(Obstacle):
@@ -46,36 +53,80 @@ class BigObstacle(Obstacle):
         pass
 
 
-FOOT_POSITIONS = STARTING_POSITIONS[:-1]
 class FootObstacle(Obstacle):
-    def __init__(self, groups):
-        super().__init__(groups)
+    def __init__(self):
+        super().__init__([])
 
-        self.image = pg.Surface((2*TRACK_WIDTH, 2*TRACK_WIDTH))
-        self.rect = self.image.get_frect(topleft = random.choice(FOOT_POSITIONS))
+        self.image = pg.Surface((2*TRACK_WIDTH-2*PADDING, 2*TRACK_WIDTH))
+        self.original = self.image.copy()
+        self.rect = self.image.get_frect(topleft = random.choice(STARTING_POSITIONS))
         self.rect.y += -starting_y + (NUMBER_OF_SPRITES - 2) * TRACK_WIDTH - PADDING/2
+        if self.rect.right >= WINDOW_WIDTH:
+            self.rect.right -= PADDING/2
+        else:
+            self.rect.left += PADDING/2
+
+        self.shadow = self.rect.copy().inflate(-self.rect.width, -self.rect.height)
+        self.growing = True
+        self.passed = False
+        self.rate = 175
 
     def draw(self, screen):
-        pg.draw.rect(screen, 'BROWN', self.rect)
+        pg.draw.rect(screen, 'GOLD', self.shadow)
+        if not self.growing: pg.draw.rect(screen, 'BROWN', self.rect)
 
     def move(self, dt):
-        pass
+        if not self.growing:
+            self.rect.y += dt * TRACK_SPEED
+            if self.rect.top >= WINDOW_HEIGHT: self.passed = True
+
+    def animate(self, dt):
+        self.shadow.inflate_ip(dt * self.rate, dt * self.rate)
+        if self.shadow.width >= self.rect.width:
+            self.shadow.size = self.rect.size
+            self.growing = False
+        self.shadow.center = self.rect.center
 
 class ObstacleCreation:
-    def __init__(self, groups, delay, rate):
-        self.delay = delay
+    def __init__(self, groups, rate):
         self.groups = groups
         self.rate = rate
-        self.timer = Timer(delay, func=self.create, repeat=True, autostart=True)
+        self.delay = 3000
+        self.bosstimer = Timer(30000, autostart=True)
+        self.timer = Timer(self.delay, func=self.create, repeat=True, autostart=True)
+        self.boss = FootObstacle()
+        self.dt = 0
+        self.createdtimes = 0
+        self.bossdelays = Timer(2000)
+        self.bossdelay_activated = False
 
     def create(self):
         choice = random.randint(1, 6)
-        if choice > 6:
-            Obstacle(self.groups)
-        elif choice == 9:
-            BigObstacle(self.groups)
-        else:
-            FootObstacle(self.groups)
+        if self.bosstimer:
+            if choice < 5:
+                Obstacle(self.groups)
+            else:
+                BigObstacle(self.groups)
 
-    def update(self):
+    def bosscreate(self):
+        self.boss.update(self.dt)
+        if self.boss.passed:
+            if not self.bossdelay_activated and not self.createdtimes:
+                self.bossdelay_activated = True
+                self.bossdelays.activate()
+            elif not self.bossdelays:
+                del self.boss
+                self.boss = FootObstacle()
+                if self.createdtimes >= 1:
+                    self.bosstimer.activate()
+                    self.createdtimes = 0
+                    self.bossdelay_activated = False
+                else: self.createdtimes += 1
+
+    def update(self, dt):
+        self.dt = dt
+        self.bosstimer.update()
+        self.bossdelays.update()
         self.timer.update()
+        if not self.bosstimer:
+            self.bosscreate()
