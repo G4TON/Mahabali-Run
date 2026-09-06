@@ -24,6 +24,12 @@ class Player(pg.sprite.Sprite):
         self.image_rect.centerx = WINDOW_WIDTH/2
         self.image_rect.centery = self.orig_rect.centery
 
+    def move_right(self):
+        self.direction = 1
+
+    def move_left(self):
+        self.direction = -1
+
     def state_reset(self):
         self.state = 0
 

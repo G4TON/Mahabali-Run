@@ -31,11 +31,13 @@ class Game:
         self.sounds['bgm'].set_volume(0.5)
 
     def start_run(self):
+        TRACK_SPEED = TRACK_WIDTH * 1.5
         self.sounds['gamestart'].play()
         self.player.reset()
         self.obstacle_sprites.empty()
         self.creator.timer.activate()
         self.creator.bosstimer.activate()
+        self.creator.timer.duration = self.creator.delay
         self.gameovertimer.deactivate()
         self.SCORE = 0
         self.gameover = False
@@ -52,26 +54,48 @@ class Game:
                     return
                 elif sprite.rect_left.colliderect(self.player.rect) or sprite.rect_right.colliderect(self.player.rect):
                     self.sounds['gameover'].play()
+                    self.sounds['gameover'].set_volume(0.5)
                     self.gameovertimer.activate()
                 else:
                     self.sounds['gameover'].play()
+                    self.sounds['gameover'].set_volume(0.5)
                     self.gameovertimer.activate()
             else:
                 self.sounds['gameover'].play()
+                self.sounds['gameover'].set_volume(0.5)
                 self.gameovertimer.activate()
 
         bosscollided = self.creator.boss.rect.colliderect(self.player.rect) and not self.creator.boss.growing
         if bosscollided and not self.gameovertimer:
             self.sounds['gameover'].play()
+            self.sounds['gameover'].set_volume(0.5)
             self.gameovertimer.activate()
 
     def run(self):
         self.SCORE = 0
+        touch_start = None
         while self.running:
             dt = self.clock.tick() / 1000
             for event in pg.event.get():
+
                 if exitPressed(event):
                     self.running = False
+
+                elif event.type == pg.FINGERDOWN:
+                    touch_start = pg.Vector2(event.x, event.y)
+
+                elif event.type == pg.FINGERUP and touch_start is not None:
+                    touch_end = pg.Vector2(event.x, event.y)
+                    swipe = touch_end - touch_start
+
+                    if abs(swipe.x) > abs(swipe.y):
+                        if abs(swipe.x) > 0.1:
+                            if swipe.x > 0:
+                                self.player.move_right()
+                            else:
+                                self.player.move_left()
+
+                    touch_start = None
 
             self.screen.fill('#C2B280')
             if not self.gameover:
