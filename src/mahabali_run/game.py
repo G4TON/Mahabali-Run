@@ -8,9 +8,11 @@ import pygame as pg
 
 class Game:
     def __init__(self):
+        pg.mixer.pre_init(44100, -16, 2, 512)
         pg.init()
 
-        self.screen = pg.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.screen = pg.display.set_mode((0, 0), pg.FULLSCREEN)
+        self.game_surface = pg.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
         pg.display.set_caption('Mahabali Run')
 
         self.clock = pg.time.Clock()
@@ -75,11 +77,16 @@ class Game:
         self.SCORE = 0
         touch_start = None
         while self.running:
-            dt = self.clock.tick() / 1000
+            dt = self.clock.tick(60) / 1000
             for event in pg.event.get():
 
-                if exitPressed(event):
-                    self.running = False
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        self.running = False
+
+                if self.gameover:
+                    if event.type in (pg.FINGERDOWN, pg.MOUSEBUTTONDOWN):
+                        self.start_run()
 
                 elif event.type == pg.FINGERDOWN:
                     touch_start = pg.Vector2(event.x, event.y)
@@ -97,18 +104,18 @@ class Game:
 
                     touch_start = None
 
-            self.screen.fill('#C2B280')
+            self.game_surface.fill('#C2B280')
             if not self.gameover:
                 for sprite in self.obstacle_sprites:
                     if isinstance(sprite, Obstacle) and not isinstance(sprite, BigObstacle):
-                        self.screen.blit(sprite.image, sprite.image_rect)
-                if self.player.state == -1: self.screen.blit(self.player.image, self.player.image_rect)
+                        self.game_surface.blit(sprite.image, sprite.image_rect)
+                if self.player.state == -1: self.game_surface.blit(self.player.image, self.player.image_rect)
                 for sprite in self.obstacle_sprites:
-                    if isinstance(sprite, BigObstacle): sprite.draw(self.screen)
+                    if isinstance(sprite, BigObstacle): sprite.draw(self.game_surface)
                     elif isinstance(sprite, Obstacle): continue
-                    else: self.screen.blit(sprite.image, sprite.image_rect)
-                if self.player.state != -1: self.screen.blit(self.player.image, self.player.image_rect)
-                if not self.creator.bosstimer: self.creator.boss.draw(self.screen)
+                    else: self.game_surface.blit(sprite.image, sprite.image_rect)
+                if self.player.state != -1: self.game_surface.blit(self.player.image, self.player.image_rect)
+                if not self.creator.bosstimer: self.creator.boss.draw(self.game_surface)
 
                 self.creator.update(dt)
                 self.obstacle_sprites.update(dt)
@@ -119,8 +126,10 @@ class Game:
                 self.gameovertimer.update()
             else:
                 self.playbutton.update()
-                self.screen.blit(self.playbutton.image, self.playbutton.rect)
-                self.screen.blit(self.player.sprites[1], self.player.image_rect)
-            self.screen.blit(self.score.text, self.score.rect)
+                self.game_surface.blit(self.playbutton.image, self.playbutton.rect)
+                self.game_surface.blit(self.player.sprites[1], self.player.image_rect)
+            self.game_surface.blit(self.score.text, self.score.rect)
+            scaled = pg.transform.scale(self.game_surface, self.screen.get_size())
+            self.screen.blit(scaled, (0, 0))
             pg.display.update()
         pg.quit()
