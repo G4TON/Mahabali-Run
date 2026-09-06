@@ -1,7 +1,7 @@
-from settings import *
 from utils import *
 from player import Player
-from obstacle import BigObstacle, ObstacleCreation, FootObstacle
+from obstacle import BigObstacle, ObstacleCreation, FootObstacle, Obstacle
+from settings import *
 
 import pygame as pg
 
@@ -15,26 +15,88 @@ class Game:
 
         self.clock = pg.time.Clock()
         self.running = True
+        self.sprites = load_svgs(asset_path('graphics'))
+        self.sounds = load_sounds(asset_path('sounds'))
 
-        self.all_sprites = pg.sprite.Group()
-        self.player = Player()
-        self.creator = ObstacleCreation(self.all_sprites, 9)
+        self.obstacle_sprites = pg.sprite.Group()
+        self.creator = ObstacleCreation(self.obstacle_sprites, self.sprites, self.sounds)
+
+        self.gameover = True
+        self.playbutton = Button(self.sprites['button'], (WINDOW_WIDTH/2, WINDOW_HEIGHT/2), self.start_run)
+        self.score = Text('0', 'gold', pg.Font(None, 100), (WINDOW_WIDTH/2, 100))
+        self.gameovertimer = Timer(1000, func=self.homescreen)
+        self.player = Player(self.sprites, self.gameovertimer)
+
+        self.sounds['bgm'].play(-1)
+        self.sounds['bgm'].set_volume(0.5)
+
+    def start_run(self):
+        self.sounds['gamestart'].play()
+        self.player.reset()
+        self.obstacle_sprites.empty()
+        self.creator.timer.activate()
+        self.creator.bosstimer.activate()
+        self.gameovertimer.deactivate()
+        self.SCORE = 0
+        self.gameover = False
+
+    def homescreen(self):
+        self.gameover = True
+
+    def collision(self):
+        collided = pg.sprite.spritecollide(self.player, self.obstacle_sprites, False)
+        if collided:
+            sprite = collided[-1]
+            if isinstance(sprite, BigObstacle):
+                if self.player.rect.centerx == WINDOW_WIDTH/2 and self.player.state == -1:
+                    return
+                elif sprite.rect_left.colliderect(self.player.rect) or sprite.rect_right.colliderect(self.player.rect):
+                    self.sounds['gameover'].play()
+                    self.gameovertimer.activate()
+                else:
+                    self.sounds['gameover'].play()
+                    self.gameovertimer.activate()
+            else:
+                self.sounds['gameover'].play()
+                self.gameovertimer.activate()
+
+        bosscollided = self.creator.boss.rect.colliderect(self.player.rect) and not self.creator.boss.growing
+        if bosscollided and not self.gameovertimer:
+            self.sounds['gameover'].play()
+            self.gameovertimer.activate()
 
     def run(self):
+        self.SCORE = 0
         while self.running:
             dt = self.clock.tick() / 1000
             for event in pg.event.get():
                 if exitPressed(event):
                     self.running = False
 
-            self.screen.fill('white')
-            for sprite in self.all_sprites:
-                if isinstance(sprite, BigObstacle): sprite.draw(self.screen)
-                else: self.screen.blit(sprite.image, sprite.rect)
-            self.screen.blit(self.player.image, self.player.rect)
-            if not self.creator.bosstimer: self.creator.boss.draw(self.screen)
-            self.creator.update(dt)
-            self.all_sprites.update(dt)
-            self.player.update(dt)
+            self.screen.fill('#C2B280')
+            if not self.gameover:
+                for sprite in self.obstacle_sprites:
+                    if isinstance(sprite, Obstacle) and not isinstance(sprite, BigObstacle):
+                        self.screen.blit(sprite.image, sprite.image_rect)
+                if self.player.state == -1: self.screen.blit(self.player.image, self.player.image_rect)
+                for sprite in self.obstacle_sprites:
+                    if isinstance(sprite, BigObstacle): sprite.draw(self.screen)
+                    elif isinstance(sprite, Obstacle): continue
+                    else: self.screen.blit(sprite.image, sprite.image_rect)
+                if self.player.state != -1: self.screen.blit(self.player.image, self.player.image_rect)
+                if not self.creator.bosstimer: self.creator.boss.draw(self.screen)
+
+                self.creator.update(dt)
+                self.obstacle_sprites.update(dt)
+                self.player.update(dt)
+                self.SCORE += dt * 2
+                self.score.update(f'{int(self.SCORE)}')
+                self.collision()
+                self.gameovertimer.update()
+            else:
+                self.playbutton.update()
+                self.screen.blit(self.playbutton.image, self.playbutton.rect)
+                self.screen.blit(self.player.sprites[1], self.player.image_rect)
+            self.screen.blit(self.score.text, self.score.rect)
             pg.display.update()
         pg.quit()

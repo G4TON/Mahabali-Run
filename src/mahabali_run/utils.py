@@ -1,4 +1,32 @@
 import pygame as pg
+from pathlib import Path
+from settings import *
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+def asset_path(*parts):
+    return BASE_DIR.joinpath(*parts)
+
+
+def load_svgs(directory):
+    sprites = {}
+
+    for file in Path(directory).iterdir():
+        if file.suffix.lower() in {".svg", ".png"}:
+            image = pg.image.load(file).convert_alpha()
+            if file.stem == 'balifront': image = pg.transform.flip(image, False, True)
+            sprites[file.stem] = pg.transform.scale_by(image, SPRITE_SCALING)
+
+    return sprites
+
+
+def load_sounds(directory):
+    sounds = {}
+
+    for file in Path(directory).glob("*.mp3"):
+        sounds[file.stem] = pg.mixer.Sound(str(file))
+
+    return sounds
 
 
 def exitPressed(event):
@@ -40,3 +68,29 @@ class Timer:
         if pg.time.get_ticks() - self.start_time >= self.duration:
             if self.func and self.start_time: self.func()   # only calls function if timer has been started
             self.deactivate()
+
+
+class Button:
+    def __init__(self, image, pos, func):
+        self.image = image
+        self.rect = self.image.get_frect(center=pos)
+        self.func = func
+
+    def update(self):
+        mousepos = pg.mouse.get_pos()
+
+        if pg.mouse.get_just_pressed()[0] and self.rect.collidepoint(mousepos):
+            self.func()
+
+
+class Text:
+    def __init__(self, message, color, font, pos):
+        self.font = font
+        self.text = self.font.render(message, True, color)
+        self.color = color
+        self.rect = self.text.get_frect(center=pos)
+        self.pos = pos
+
+    def update(self, message):
+        self.text = self.font.render(message, True, self.color)
+        self.rect.center = self.pos
