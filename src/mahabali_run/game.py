@@ -11,14 +11,16 @@ class Game:
         pg.mixer.pre_init(44100, -16, 2, 512)
         pg.init()
 
-        self.screen = pg.display.set_mode((0, 0), pg.FULLSCREEN)
-        self.game_surface = pg.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+        # self.screen = pg.display.set_mode((0, 0), pg.FULLSCREEN)
+        self.game_surface = pg.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pg.display.set_caption('Mahabali Run')
 
         self.clock = pg.time.Clock()
         self.running = True
         self.sprites = load_svgs(asset_path('graphics'))
         self.sounds = load_sounds(asset_path('sounds'))
+
+        pg.display.set_icon(self.sprites['icon'])
 
         self.obstacle_sprites = pg.sprite.Group()
         self.creator = ObstacleCreation(self.obstacle_sprites, self.sprites, self.sounds)
@@ -135,7 +137,7 @@ class Game:
                 self.game_surface.blit(self.playbutton.image, self.playbutton.rect)
                 self.game_surface.blit(self.player.sprites[1], self.player.image_rect)
             self.game_surface.blit(self.score.text, self.score.rect)
-            scaled = pg.transform.scale(self.game_surface, self.screen.get_size())
-            self.screen.blit(scaled, (0, 0))
+            # scaled = pg.transform.scale(self.game_surface, self.screen.get_size())
+            # self.screen.blit(scaled, (0, 0))
             pg.display.update()
         pg.quit()
