@@ -30,6 +30,9 @@ class Player(pg.sprite.Sprite):
     def move_left(self):
         self.direction = -1
 
+    def slide(self):
+        self.state = -1
+
     def state_reset(self):
         self.state = 0
 

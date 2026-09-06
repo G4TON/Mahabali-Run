@@ -24,8 +24,8 @@ class Game:
         self.creator = ObstacleCreation(self.obstacle_sprites, self.sprites, self.sounds)
 
         self.gameover = True
-        self.playbutton = Button(self.sprites['button'], (WINDOW_WIDTH/2, WINDOW_HEIGHT/2), self.start_run)
-        self.score = Text('0', 'gold', pg.Font(None, 100), (WINDOW_WIDTH/2, 100))
+        self.playbutton = Button(self.sprites['button'], (WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), self.start_run)
+        self.score = Text('0', 'gold', pg.Font(None, 100), (WINDOW_WIDTH / 2, 100))
         self.gameovertimer = Timer(1000, func=self.homescreen)
         self.player = Player(self.sprites, self.gameovertimer)
 
@@ -52,7 +52,7 @@ class Game:
         if collided:
             sprite = collided[-1]
             if isinstance(sprite, BigObstacle):
-                if self.player.rect.centerx == WINDOW_WIDTH/2 and self.player.state == -1:
+                if self.player.rect.centerx == WINDOW_WIDTH / 2 and self.player.state == -1:
                     return
                 elif sprite.rect_left.colliderect(self.player.rect) or sprite.rect_right.colliderect(self.player.rect):
                     self.sounds['gameover'].play()
@@ -94,13 +94,16 @@ class Game:
                 elif event.type == pg.FINGERUP and touch_start is not None:
                     touch_end = pg.Vector2(event.x, event.y)
                     swipe = touch_end - touch_start
-
                     if abs(swipe.x) > abs(swipe.y):
                         if abs(swipe.x) > 0.1:
                             if swipe.x > 0:
                                 self.player.move_right()
                             else:
                                 self.player.move_left()
+                    else:
+                        if abs(swipe.y) > 0.1:
+                            if swipe.y > 0:
+                                self.player.slide()  # swipe down
 
                     touch_start = None
 
@@ -111,9 +114,12 @@ class Game:
                         self.game_surface.blit(sprite.image, sprite.image_rect)
                 if self.player.state == -1: self.game_surface.blit(self.player.image, self.player.image_rect)
                 for sprite in self.obstacle_sprites:
-                    if isinstance(sprite, BigObstacle): sprite.draw(self.game_surface)
-                    elif isinstance(sprite, Obstacle): continue
-                    else: self.game_surface.blit(sprite.image, sprite.image_rect)
+                    if isinstance(sprite, BigObstacle):
+                        sprite.draw(self.game_surface)
+                    elif isinstance(sprite, Obstacle):
+                        continue
+                    else:
+                        self.game_surface.blit(sprite.image, sprite.image_rect)
                 if self.player.state != -1: self.game_surface.blit(self.player.image, self.player.image_rect)
                 if not self.creator.bosstimer: self.creator.boss.draw(self.game_surface)
 
