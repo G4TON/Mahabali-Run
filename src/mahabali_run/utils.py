@@ -27,6 +27,7 @@ def load_svgs(directory):
 
 
 def load_sounds(directory):
+    pg.mixer.init()
     sounds = {}
 
     for file in Path(directory).glob("*.mp3"):

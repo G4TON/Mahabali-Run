@@ -8,7 +8,6 @@ import pygame as pg
 
 class Game:
     def __init__(self):
-        pg.mixer.pre_init(44100, -16, 2, 512)
         pg.init()
 
         self.screen = pg.display.set_mode((0, 0), pg.FULLSCREEN)
