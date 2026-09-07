@@ -38,7 +38,7 @@ class Player(pg.sprite.Sprite):
 
     def get_input(self):
         keys = pg.key.get_just_pressed()
-        if not IS_ANDROID and not self.timer:
+        if not self.timer:
             if keys[pg.K_a] or keys[pg.K_LEFT]:
                 self.state_reset()
                 self.direction = -1
