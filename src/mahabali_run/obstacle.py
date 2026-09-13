@@ -144,7 +144,7 @@ class ObstacleCreation:
         choice = random.randint(1, 6)
         self.timer.duration *= 99/100
         global TRACK_SPEED
-        TRACK_SPEED += TRACK_SPEED * 0.01
+        TRACK_SPEED += TRACK_SPEED * 0.05
         if self.bosstimer:
             if choice < 5:
                 Obstacle(self.groups, self.sprites)

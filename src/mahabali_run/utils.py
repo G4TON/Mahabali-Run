@@ -1,8 +1,14 @@
 import pygame as pg
 from pathlib import Path
 from settings import *
+import sys
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+def get_base_dir():
+    if getattr(sys, 'frozen', False):
+        return Path(sys._MEIPASS)
+    return Path(__file__).resolve().parent.parent
+
+BASE_DIR = get_base_dir()
 
 def asset_path(*parts):
     return BASE_DIR.joinpath(*parts)
